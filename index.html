@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PC Agents Admin Panel</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="login" class="login-wrap hidden">
+    <form id="login-form" class="login-card">
+      <h1>PC Agents</h1>
+      <p class="muted">Sign in to view your devices</p>
+      <input type="email" id="email" placeholder="Email" autocomplete="username" required />
+      <input type="password" id="password" placeholder="Password" autocomplete="current-password" required />
+      <button type="submit" id="login-btn">Sign in</button>
+      <p id="login-error" class="error"></p>
+    </form>
+  </div>
+
+  <div id="app" class="app hidden">
+    <button id="menu-btn" class="menu-btn" aria-label="Menu">&#9776;</button>
+
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <span class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
+        <div>
+          <div class="brand-t1">PC Agents</div>
+          <div class="brand-t2">Monitor &middot; Manage &middot; Optimize</div>
+        </div>
+      </div>
+
+      <input type="search" id="device-search" class="mini-search" placeholder="Search devices..." />
+      <ul id="device-list" class="device-list"></ul>
+
+      <div class="nav-sep">Navigation</div>
+      <nav class="nav" id="tabs">
+        <button data-tab="devices" class="active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>All Devices</button>
+        <button data-tab="overview"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>Overview</button>
+        <button data-tab="processes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>Processes</button>
+        <button data-tab="screenshots"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>Screenshots</button>
+        <button data-tab="browser"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 0 20 15.3 15.3 0 0 1 0-20z"/></svg>Browser</button>
+        <button data-tab="activity"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>Activity</button>
+        <button data-tab="remote"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="10" rx="4"/><path d="M7 12h2M8 11v2M15 11h.01M17.5 13h.01"/></svg>Remote</button>
+      </nav>
+
+      <div class="sidebar-foot">
+        <span class="sid-status"><span class="status-dot on" id="sid-dot"></span> <span id="sid-status-text">Connected</span></span>
+        <button id="logout-btn" class="logout">Sign out</button>
+      </div>
+    </aside>
+
+    <main class="content">
+      <header class="page-head">
+        <div class="ph-left">
+          <span class="ph-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
+          <div>
+            <div class="ph-name" id="device-title">All devices</div>
+            <div class="ph-id" id="device-sub"></div>
+          </div>
+          <span id="online-badge" class="badge">-</span>
+        </div>
+        <div class="ph-right" id="device-meta" style="display:none">
+          <div class="ph-meta"><span class="ph-k">OS</span><span class="ph-v" id="meta-os">&mdash;</span></div>
+          <div class="ph-meta"><span class="ph-k">Uptime</span><span class="ph-v" id="meta-uptime">&mdash;</span></div>
+          <div class="ph-meta"><span class="ph-k">Active</span><span class="ph-v" id="meta-active">&mdash;</span></div>
+          <span class="health-pill" id="health-pill">System Healthy</span>
+        </div>
+      </header>
+
+      <section id="panel-devices" class="panel">
+        <div id="device-grid" class="device-grid"></div>
+      </section>
+
+      <section id="panel-overview" class="panel active">
+        <div class="cards" id="stat-cards"></div>
+        <div class="card">
+          <div class="chart-head">
+            <div class="label">CPU / RAM Usage</div>
+            <div class="range" id="chart-range">
+              <button data-range="1m" class="active">1m</button>
+              <button data-range="5m">5m</button>
+              <button data-range="15m">15m</button>
+              <button data-range="1h">1h</button>
+              <button data-range="24h">24h</button>
+            </div>
+          </div>
+          <canvas id="chart" class="chart"></canvas>
+          <div class="legend">
+            <span><i class="sw cpu"></i> CPU <b id="legend-cpu">&mdash;</b></span>
+            <span><i class="sw ram"></i> RAM <b id="legend-ram">&mdash;</b></span>
+          </div>
+        </div>
+        <h3>System Information</h3>
+        <div class="info-grid" id="info-grid"></div>
+        <h3>Disks</h3>
+        <div id="disks"></div>
+      </section>
+
+      <section id="panel-processes" class="panel">
+        <input type="search" id="proc-search" class="search" placeholder="Filter processes by name, user or PID..." />
+        <div class="table-wrap">
+        <table class="table sortable">
+          <thead>
+            <tr>
+              <th data-key="pid">PID</th>
+              <th data-key="name">Process</th>
+              <th data-key="username">User</th>
+              <th data-key="cpuPercent">CPU %</th>
+              <th data-key="memMb">Memory (MB)</th>
+            </tr>
+          </thead>
+          <tbody id="process-body"></tbody>
+        </table>
+        </div>
+      </section>
+
+      <section id="panel-screenshots" class="panel">
+        <div id="screenshots" class="shots"></div>
+      </section>
+
+      <section id="panel-browser" class="panel">
+        <input type="search" id="browser-search" class="search" placeholder="Filter by title, URL or browser..." />
+        <div class="table-wrap">
+        <table class="table sortable">
+          <thead>
+            <tr>
+              <th data-key="time">Time</th>
+              <th data-key="browser">Browser</th>
+              <th data-key="title">Title</th>
+              <th data-key="url">URL</th>
+            </tr>
+          </thead>
+          <tbody id="browser-body"></tbody>
+        </table>
+        </div>
+      </section>
+
+      <section id="panel-activity" class="panel">
+        <ul id="activity-list" class="activity"></ul>
+      </section>
+
+      <section id="panel-remote" class="panel">
+        <div class="remote-grid">
+          <div class="card">
+            <div class="label">Power / Lock</div>
+            <div class="btn-row">
+              <button class="rbtn danger" data-cmd="shutdown">Shutdown</button>
+              <button class="rbtn danger" data-cmd="restart">Restart</button>
+              <button class="rbtn" data-cmd="lock">Lock</button>
+              <button class="rbtn" data-cmd="sleep">Sleep</button>
+              <button class="rbtn" data-cmd="monitor_off">Monitor off</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="label">Notification (toast)</div>
+            <input type="text" id="msg-title" class="search" placeholder="Title" style="margin:8px 0" />
+            <input type="text" id="msg-text" class="search" placeholder="Message text..." style="margin:0 0 8px" />
+            <button class="rbtn primary" data-cmd="message">Send notification</button>
+            <button class="rbtn" data-cmd="beep">Beep</button>
+          </div>
+
+          <div class="card">
+            <div class="label">Screenshot</div>
+            <p class="muted" style="font-size:12px;margin:8px 0 10px">Capture the screen right now.</p>
+            <button class="rbtn primary" data-cmd="screenshot_now">Capture now</button>
+          </div>
+
+          <div class="card live-card">
+            <div class="label">Live Screen</div>
+            <div class="live-head">
+              <span id="live-status" class="muted" style="font-size:12px">stopped</span>
+              <span>
+                <button class="rbtn" id="open-session">Open session</button>
+                <button class="rbtn" id="live-toggle">Start live</button>
+              </span>
+            </div>
+            <div class="live-frame">
+              <img id="live-img" class="live-img" alt="live screen" />
+              <span id="live-empty" class="muted">No live frames. Click "Start live".</span>
+            </div>
+          </div>
+        </div>
+
+        <h3>Recent commands</h3>
+        <div class="table-wrap">
+          <table class="table">
+            <thead><tr><th>Time</th><th>Command</th><th>Status</th><th>Result</th></tr></thead>
+            <tbody id="command-body"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div id="lightbox" class="lightbox hidden">
+    <button class="lb-close" id="lb-close">&times;</button>
+    <button class="lb-nav lb-prev" id="lb-prev">&#10094;</button>
+    <img id="lb-img" alt="screenshot" />
+    <button class="lb-nav lb-next" id="lb-next">&#10095;</button>
+    <div class="lb-bar">
+      <span id="lb-caption"></span>
+      <a id="lb-download" download="screenshot.jpg">Download</a>
+    </div>
+  </div>
+
+  <div id="backdrop" class="backdrop hidden"></div>
+
+  <div id="session" class="session hidden">
+    <header class="sess-top">
+      <span class="status-dot on"></span>
+      <span id="sess-title" class="sess-title">Device</span>
+      <span id="sess-status" class="muted"></span>
+      <button id="sess-close" class="sess-btn">Close</button>
+    </header>
+    <div class="sess-stage" id="sess-stage">
+      <img id="sess-img" class="sess-snap" alt="live screen" />
+      <video id="rtc-video" playsinline></video>
+      <span id="sess-empty" class="muted">No live frames. Click "Start live" or "Connect HD".</span>
+    </div>
+    <footer class="sess-toolbar">
+      <label class="sess-field">Quality
+        <select id="sess-quality">
+          <option value="low">Low (fast)</option>
+          <option value="medium" selected>Medium</option>
+          <option value="high">High</option>
+        </select>
+      </label>
+      <button id="sess-live" class="sess-btn">Start live</button>
+      <button id="sess-rtc" class="sess-btn">Connect HD</button>
+      <button id="sess-shot" class="sess-btn">Screenshot</button>
+      <button id="sess-full" class="sess-btn">Fullscreen</button>
+      <span id="sess-fps" class="muted"></span>
+      <span id="rtc-status" class="muted"></span>
+    </footer>
+  </div>
+
+  <script src="firebase-config.js"></script>
+  <script type="module" src="app.js"></script>
+</body>
+</html>
