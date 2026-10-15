@@ -42,6 +42,7 @@
         <button data-tab="browser"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 0 20 15.3 15.3 0 0 1 0-20z"/></svg>Browser</button>
         <button data-tab="activity"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>Activity</button>
         <button data-tab="remote"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="10" rx="4"/><path d="M7 12h2M8 11v2M15 11h.01M17.5 13h.01"/></svg>Remote</button>
+        <button data-tab="controller"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 12h4M8 10v4"/><circle cx="15.5" cy="11" r="1"/><circle cx="17.5" cy="13" r="1"/><path d="M17.32 5H6.68a4 4 0 0 0-3.98 3.59c-.06.53-.1 1.07-.1 1.62 0 3.99 1.36 7.31 3.4 7.31 1.24 0 2.14-1.28 2.63-3.19h7.74c.49 1.91 1.39 3.19 2.63 3.19 2.04 0 3.4-3.32 3.4-7.31 0-.55-.04-1.09-.1-1.62A4 4 0 0 0 17.32 5z"/></svg>Controller</button>
       </nav>
 
       <div class="sidebar-foot">
@@ -190,6 +191,43 @@
             <tbody id="command-body"></tbody>
           </table>
         </div>
+      </section>
+
+      <section id="panel-controller" class="panel">
+        <div class="ctl-head">
+          <div>
+            <div class="label">Game controller</div>
+            <div class="muted" id="ctl-status" style="font-size:12px">disconnected</div>
+          </div>
+          <button id="ctl-connect" class="rbtn primary">Connect</button>
+        </div>
+
+        <div class="ctl-screen">
+          <video id="ctl-video" class="ctl-video" playsinline muted></video>
+          <span id="ctl-empty" class="muted">Tap &quot;Connect&quot; to start the live link, then use the pad below.</span>
+        </div>
+
+        <div class="gamepad">
+          <div class="pad-block">
+            <div class="pad-title">Move (WASD)</div>
+            <div class="dpad">
+              <button class="pad-btn up"    data-key="w">W</button>
+              <button class="pad-btn left"  data-key="a">A</button>
+              <button class="pad-btn down"  data-key="s">S</button>
+              <button class="pad-btn right" data-key="d">D</button>
+            </div>
+          </div>
+          <div class="pad-block">
+            <div class="pad-title">Arrows</div>
+            <div class="dpad">
+              <button class="pad-btn up"    data-key="ArrowUp">&#9650;</button>
+              <button class="pad-btn left"  data-key="ArrowLeft">&#9664;</button>
+              <button class="pad-btn down"  data-key="ArrowDown">&#9660;</button>
+              <button class="pad-btn right" data-key="ArrowRight">&#9654;</button>
+            </div>
+          </div>
+        </div>
+        <p class="muted" style="font-size:12px;margin-top:14px">Hold a button to keep it pressed. Best on the same Wi-Fi. Some anti-cheat games block remote input.</p>
       </section>
     </main>
   </div>

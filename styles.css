@@ -321,6 +321,32 @@ h3 { margin: 24px 0 12px; font-size: 15px; font-weight: 700; color: var(--text);
 .sess-toolbar #sess-fps { font-size: 12px; }
 .sess-toolbar #rtc-status { font-size: 12px; margin-left: auto; }
 
+/* ---------- Controller ---------- */
+.ctl-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
+.ctl-screen {
+  position: relative; background: #010409; border: 1px solid var(--border); border-radius: var(--radius);
+  min-height: 200px; aspect-ratio: 16 / 9; display: grid; place-items: center; overflow: hidden; margin-bottom: 18px;
+}
+.ctl-video { width: 100%; height: 100%; object-fit: contain; display: none; background: #000; outline: none; }
+.ctl-screen #ctl-empty { position: absolute; text-align: center; padding: 0 18px; }
+
+.gamepad { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.pad-block { display: flex; flex-direction: column; align-items: center; gap: 12px; min-width: 0; width: 100%; }
+.pad-title { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; }
+.dpad { display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr); gap: 8px; width: 100%; max-width: clamp(150px, 44vw, 240px); }
+.pad-btn {
+  -webkit-user-select: none; user-select: none; touch-action: none; cursor: pointer;
+  background: var(--surface-2); border: 1px solid var(--border-2); color: var(--text);
+  border-radius: 14px; font-family: inherit; font-size: 20px; font-weight: 700;
+  aspect-ratio: 1 / 1; display: grid; place-items: center; transition: background .08s, transform .08s, border-color .08s;
+}
+.pad-btn:hover { border-color: var(--accent-line); }
+.pad-btn.pressed { background: var(--accent); border-color: var(--accent); color: #fff; transform: scale(.94); box-shadow: 0 0 18px rgba(46,144,250,.5); }
+.pad-btn.up    { grid-area: 1 / 2; }
+.pad-btn.left  { grid-area: 2 / 1; }
+.pad-btn.down  { grid-area: 3 / 2; }
+.pad-btn.right { grid-area: 2 / 3; }
+
 /* ---------- Responsive ---------- */
 @media (max-width: 900px) {
   .menu-btn { display: block; }
@@ -335,4 +361,7 @@ h3 { margin: 24px 0 12px; font-size: 15px; font-weight: 700; color: var(--text);
   .table th, .table td { padding: 8px 9px; }
   .lb-nav { padding: 9px 12px; font-size: 18px; }
   .card .spark { width: 84px; }
+  .gamepad { gap: 12px; }
+  .dpad { gap: 6px; }
+  .pad-btn { border-radius: 12px; font-size: 18px; }
 }

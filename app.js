@@ -576,27 +576,41 @@ let rtcPc = null;
 let rtcDc = null;
 let rtcSession = null;
 let rtcListeners = [];
+let rtcMode = "session";
 
 function rtcActive() {
   return rtcPc && !["closed", "failed"].includes(rtcPc.connectionState);
 }
 
+function rtcTargetVideo() {
+  return rtcMode === "controller" ? $("ctl-video") : $("rtc-video");
+}
+
 function rtcStatus(state) {
+  const on = rtcActive();
   if ($("rtc-status")) $("rtc-status").textContent = "webrtc: " + state;
   if ($("sess-rtc")) $("sess-rtc").textContent = rtcPc ? "Disconnect HD" : "Connect HD";
   const vid = $("rtc-video");
   const snap = $("sess-img");
   const empty = $("sess-empty");
-  if (vid) vid.style.display = rtcActive() ? "block" : "none";
-  if (snap) snap.style.display = rtcActive() ? "none" : (snap.getAttribute("src") ? "block" : "none");
-  if (empty) empty.style.display = rtcActive() ? "none" : (liveFrames.length ? "none" : "block");
+  if (vid) vid.style.display = on && rtcMode === "session" ? "block" : "none";
+  if (snap) snap.style.display = on ? "none" : (snap.getAttribute("src") ? "block" : "none");
+  if (empty) empty.style.display = on ? "none" : (liveFrames.length ? "none" : "block");
+  const cv = $("ctl-video");
+  const cempty = $("ctl-empty");
+  if (cv) cv.style.display = on && rtcMode === "controller" ? "block" : "none";
+  if (cempty) cempty.style.display = on && rtcMode === "controller" ? "none" : "block";
+  if ($("ctl-connect")) $("ctl-connect").textContent = rtcPc ? "Disconnect" : "Connect";
+  if ($("ctl-status")) $("ctl-status").textContent = rtcPc ? "webrtc: " + state : "disconnected";
 }
 
-async function rtcConnect() {
-  if (!currentDeviceId || rtcPc) return;
+async function rtcConnect(mode = "session") {
+  if (!currentDeviceId) return;
+  if (rtcPc) await rtcDisconnect();
+  rtcMode = mode;
   const base = `devices/${currentDeviceId}/rtc`;
   rtcSession = String(Date.now());
-  $("session").classList.remove("hidden");
+  if (mode === "session") $("session").classList.remove("hidden");
   await Promise.all(["offer", "answer", "hostCand", "agentCand", "status"].map((k) => remove(ref(db, `${base}/${k}`)).catch(() => {})));
 
   const pc = new RTCPeerConnection({ iceServers: [{ urls: "stun:stun.l.google.com:19302" }] });
@@ -610,7 +624,7 @@ async function rtcConnect() {
     if (e.candidate) push(ref(db, `${base}/hostCand`), { ...e.candidate.toJSON(), session: rtcSession });
   };
   pc.ontrack = (e) => {
-    const vid = $("rtc-video");
+    const vid = rtcTargetVideo();
     if (vid) { vid.srcObject = e.streams[0]; vid.play().catch(() => {}); }
   };
   pc.onconnectionstatechange = () => {
@@ -652,6 +666,8 @@ function rtcDisconnect() {
   rtcDc = null;
   const vid = $("rtc-video");
   if (vid) vid.srcObject = null;
+  const cv = $("ctl-video");
+  if (cv) cv.srcObject = null;
   if (currentDeviceId) remove(ref(db, `devices/${currentDeviceId}/rtc/offer`)).catch(() => {});
   rtcSession = null;
   rtcStatus("idle");
@@ -673,6 +689,33 @@ if (rtcVid) {
   rtcVid.addEventListener("keydown", (e) => { send({ t: "key", action: "down", key: e.key }); e.preventDefault(); });
   rtcVid.addEventListener("keyup", (e) => { send({ t: "key", action: "up", key: e.key }); e.preventDefault(); });
 }
+
+/* ---------- Controller (touch gamepad) ---------- */
+function dcSend(obj) {
+  if (rtcDc && rtcDc.readyState === "open") rtcDc.send(JSON.stringify(obj));
+}
+
+document.querySelectorAll("#panel-controller .pad-btn").forEach((btn) => {
+  const key = btn.dataset.key;
+  const press = (e) => {
+    e.preventDefault();
+    btn.classList.add("pressed");
+    dcSend({ t: "key", action: "down", key });
+    try { btn.setPointerCapture(e.pointerId); } catch (_) {}
+  };
+  const release = (e) => {
+    if (e) e.preventDefault();
+    btn.classList.remove("pressed");
+    dcSend({ t: "key", action: "up", key });
+  };
+  btn.addEventListener("pointerdown", press);
+  btn.addEventListener("pointerup", release);
+  btn.addEventListener("pointercancel", release);
+  btn.addEventListener("pointerleave", release);
+  btn.addEventListener("contextmenu", (e) => e.preventDefault());
+});
+
+if ($("ctl-connect")) $("ctl-connect").onclick = () => { if (rtcPc) rtcDisconnect(); else rtcConnect("controller"); };
 
 function renderCommands(data) {
   const items = normArray(data).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0)).slice(0, 15);
